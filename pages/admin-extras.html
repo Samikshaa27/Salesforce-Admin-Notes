@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Admin Extras | Salesforce Mastery Notes</title>
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <link rel="icon"
+        href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%E2%98%81%EF%B8%8F%3C/text%3E%3C/svg%3E">
+    <script>document.documentElement.dataset.theme = localStorage.getItem('sfTheme') || 'dark';</script>
+</head>
+
+<body data-base="../">
+
+    <header class="site-header">
+        <button class="icon-btn" id="menuBtn" aria-label="Menu">☰</button>
+        <a class="brand" href="../index.html"><span class="brand-mark">☁</span><span>Salesforce Mastery<small>A to Z
+                    Notes</small></span></a>
+        <div class="header-spacer"></div>
+        <div class="search-wrap"><span class="s-icon">🔍</span><input id="navSearch" type="search"
+                placeholder="Search topics…" aria-label="Search"><kbd>Ctrl K</kbd></div>
+        <button class="icon-btn" id="themeBtn" aria-label="Toggle theme">☀️</button>
+    </header>
+    <div class="progress-bar" id="progress"></div>
+
+    <div class="layout has-toc">
+        <aside class="sidebar" id="sidebar"></aside>
+        <main class="main">
+            <article class="content">
+
+                <header class="page-head">
+                    <div class="crumb"><a href="../index.html">Home</a> › <span>Admin</span> › <span>Admin Extras</span>
+                    </div>
+                    <h1>Admin Extras</h1>
+                    <p class="lede">The admin topics that sit between the other pages: standard profile names, dependent
+                        picklists, global actions,
+                        email templates and alerts, the lead process, Flow trade-offs, and the order of execution from
+                        an admin's point of view.</p>
+                </header>
+
+                <!-- ============================================ -->
+                <h2 id="standard-profiles">Standard profile names</h2>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Profile</th>
+                                <th>What it is</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>System Administrator</strong></td>
+                                <td>Full control: <em>Modify All Data</em>, <em>View Setup</em>, customize the
+                                    application. Keep the number of these small.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Standard User</strong></td>
+                                <td>Create and edit records they own across most standard objects; no setup access.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Read Only</strong></td>
+                                <td>View records and run reports, no create or edit.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Solution Manager</strong></td>
+                                <td>Standard User plus the ability to manage published solutions.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Marketing User</strong></td>
+                                <td>Standard User plus campaigns, lead import and campaign setup.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Contract Manager</strong></td>
+                                <td>Standard User plus create, edit, approve and activate contracts.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Standard Platform User</strong></td>
+                                <td>Platform licence: custom objects and a limited set of standard objects (no Leads or
+                                    Opportunities).</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Chatter Free / Chatter Only / Chatter Moderator</strong></td>
+                                <td>Collaboration-only profiles for users who don't need CRM data.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Community profiles</strong></td>
+                                <td>Customer Community, Customer Community Plus, Partner Community and Guest (site)
+                                    profiles for Experience Cloud users.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="callout tip">
+                    <span class="c-ico">🔑</span>
+                    <div class="c-body"><span class="c-title">Clone, don't edit</span>
+                        Most permissions on standard profiles are locked. Clone the nearest one, or keep a minimal
+                        profile and layer
+                        <a href="security.html">permission sets and permission set groups</a> on top.
+                    </div>
+                </div>
+
+                <!-- ============================================ -->
+                <h2 id="dependent-picklists">Dependent picklists &amp; field dependency</h2>
+                <div class="grid g2">
+                    <div class="card">
+                        <h4>Controlling field</h4>
+                        <p>A <strong>picklist or checkbox</strong> whose value decides which values appear in another
+                            field. Example: Country.</p>
+                    </div>
+                    <div class="card accent-violet">
+                        <h4>Dependent field</h4>
+                        <p>A <strong>picklist or multi-select picklist</strong> whose available values depend on the
+                            controlling field. Example: State.</p>
+                    </div>
+                </div>
+
+                <ul class="steps">
+                    <li><b>Create both fields</b> first (Object Manager → Fields &amp; Relationships).</li>
+                    <li><b>Open Field Dependencies</b> → New, choose the controlling and dependent field.</li>
+                    <li><b>Use the matrix</b> — select the dependent values and click <em>Include Values</em> for each
+                        controlling value.</li>
+                    <li><b>Check record types</b> — the values must also be enabled on the record type, or users won't
+                        see them.</li>
+                </ul>
+
+                <div class="callout warn">
+                    <span class="c-ico">⚠️</span>
+                    <div class="c-body"><span class="c-title">The dependency is a UI filter</span>
+                        Don't assume it stops bad values arriving through imports or the API. If the pairing must hold,
+                        make the picklist
+                        <em>restricted</em> and add a validation rule. A controlling field supports up to 300 values.
+                    </div>
+                </div>
+
+                <h3>Multi-select picklist</h3>
+                <p>Stores several values in one field, separated by semicolons. Filter with <code>INCLUDES</code>, and
+                    avoid it where you
+                    need clean reporting. Prefer a junction object or checkboxes when the data will be analysed.</p>
+
+                <!-- ============================================ -->
+                <h2 id="global-actions">Quick actions &amp; global actions</h2>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th></th>
+                                <th>Object-specific action</th>
+                                <th>Global action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Tied to</strong></td>
+                                <td>One object, shown on its record pages</td>
+                                <td>No object, available from anywhere</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Context</strong></td>
+                                <td>Auto-relates the new record (create a Contact from an Account and the AccountId is
+                                    filled in)</td>
+                                <td>Creates an unrelated record</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Where it appears</strong></td>
+                                <td>Page layout → <em>Salesforce Mobile and Lightning Experience Actions</em></td>
+                                <td>Global publisher layout (the <strong>+</strong> menu) and the Chatter publisher</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Types</strong></td>
+                                <td>Create a Record, Update a Record, Log a Call, Send Email, Custom (Flow, LWC,
+                                    Visualforce)</td>
+                                <td>Create a Record, Log a Call, Custom (Flow, LWC, Visualforce)</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Setup path</strong></td>
+                                <td>Object Manager → Buttons, Links, and Actions</td>
+                                <td>Setup → Global Actions</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p>Both support <strong>predefined field values</strong>, so a "New Case" action can start with Origin
+                    already set to Phone.</p>
+
+                <!-- ============================================ -->
+                <h2 id="email-templates-alerts">Email templates &amp; email alerts</h2>
+                <h3>Email templates</h3>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Type</th>
+                                <th>Use</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Text</strong></td>
+                                <td>Plain text, simplest and most compatible.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>HTML with letterhead</strong></td>
+                                <td>Classic template that wraps content in a branded letterhead.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Custom HTML</strong></td>
+                                <td>Your own HTML, no letterhead.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Visualforce</strong></td>
+                                <td>Full control and logic; developer-built.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Lightning Email Template</strong></td>
+                                <td>Built in the Lightning template builder, with rich text, images and related-object
+                                    merge fields.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p>Merge fields pull record data into the message. Classic templates use
+                    <code>{!Contact.FirstName}</code>;
+                    Lightning templates use <code>{{{Recipient.FirstName}}}</code>. Templates live in folders, and
+                    folder access decides who can use them.</p>
+
+                <h3>Email alerts</h3>
+                <ul class="steps">
+                    <li><b>An email alert is an action</b> that sends an email from a template when something fires it.
+                    </li>
+                    <li><b>Fired by</b> record-triggered Flows, approval processes, escalation rules and legacy workflow
+                        rules.</li>
+                    <li><b>Recipients</b> can be users, roles, public groups, an email field on the record, the owner,
+                        or a few typed addresses.</li>
+                    <li><b>From address</b> can be an Org-Wide Email Address, so replies go to a shared inbox.</li>
+                    <li><b>Daily send limits apply</b> and scale with licences, so check them before a bulk
+                        notification.</li>
+                </ul>
+
+                <!-- ============================================ -->
+                <h2 id="lead-process">Lead process</h2>
+                <h3>Lead lifecycle</h3>
+                <div class="dgm">
+                    <div class="dgm-title">Lead → customer</div>
+                    <p><strong>Capture</strong> (Web-to-Lead, import, manual) → <strong>Assign</strong> (assignment
+                        rule, queue) → <strong>Nurture</strong> (campaigns, follow-up)
+                        → <strong>Qualify</strong> (status moves to a converted value) → <strong>Convert</strong>
+                        (Account + Contact + Opportunity).</p>
+                </div>
+
+                <div class="grid g2">
+                    <div class="card">
+                        <h4>Lead process (configuration)</h4>
+                        <p>Defines which <strong>Lead Status</strong> values are available for a record type. Different
+                            record types can use different processes.</p>
+                    </div>
+                    <div class="card accent-violet">
+                        <h4>Lead conversion</h4>
+                        <p>Creates an Account, a Contact and optionally an Opportunity, and carries lead data across
+                            using the <strong>lead field mapping</strong>.</p>
+                    </div>
+                </div>
+
+                <div class="callout note">
+                    <span class="c-ico">📝</span>
+                    <div class="c-body"><span class="c-title">Converted status</span>
+                        At least one Lead Status value must be marked <em>Converted</em>, otherwise leads can't be
+                        converted. Converted leads become read-only.
+                        Check duplicate rules first so conversion attaches to the existing Account or Contact instead of
+                        creating copies.</div>
+                </div>
+                <p>Related pages: <a href="admin.html#web-to-lead">Web-to-Lead</a>, <a
+                        href="admin.html#assignment-rules">Assignment rules</a>,
+                    <a href="admin.html#duplicate-rules">Duplicate rules</a>, <a
+                        href="admin.html#standard-objects-end-to-end">Lead → Cash</a>.
+                </p>
+
+                <!-- ============================================ -->
+                <h2 id="flow-tradeoffs">Flows: advantages &amp; limitations</h2>
+                <div class="grid g2">
+                    <div class="card">
+                        <h4>Advantages</h4>
+                        <p>Declarative, covers most automation, and replaces Workflow Rules and Process Builder (both
+                            retired). Built-in debugging, versions, and fast before-save updates on the same record.</p>
+                    </div>
+                    <div class="card accent-violet">
+                        <h4>Limitations</h4>
+                        <p>Same per-transaction governor limits as Apex. Heavy bulk logic and complex algorithms are
+                            easier in code. Several flows on one object need a defined trigger order.</p>
+                    </div>
+                </div>
+
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Limit / trap</th>
+                                <th>What to do</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>100 SOQL queries and 150 DML statements per transaction</td>
+                                <td>Never put <strong>Get Records</strong> or <strong>DML</strong> elements inside a
+                                    loop; collect, then act once.</td>
+                            </tr>
+                            <tr>
+                                <td>2,000 executed elements per interview</td>
+                                <td>Simplify loops, or move heavy work to an asynchronous path or Apex.</td>
+                            </tr>
+                            <tr>
+                                <td>Order of record-triggered flows isn't guaranteed</td>
+                                <td>Set a <strong>trigger order</strong> or combine into one flow per object and event.
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Unhandled errors roll back the save</td>
+                                <td>Add <strong>fault paths</strong> and notify an admin.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p>Types, elements and best practices are on the <a href="flows.html">Flow Builder (Deep)</a> page.</p>
+
+                <!-- ============================================ -->
+                <h2 id="order-of-execution">Order of execution (admin view)</h2>
+                <p>When a record is saved, Salesforce runs automation in this sequence:</p>
+                <ul class="steps">
+                    <li><b>1.</b> Load the record and run system validation (required fields, formats, lengths).</li>
+                    <li><b>2.</b> <strong>Before-save</strong> record-triggered flows.</li>
+                    <li><b>3.</b> Before triggers (Apex).</li>
+                    <li><b>4.</b> System validation again, then <strong>custom validation rules</strong>.</li>
+                    <li><b>5.</b> <strong>Duplicate rules</strong>.</li>
+                    <li><b>6.</b> Record saved to the database (not yet committed).</li>
+                    <li><b>7.</b> After triggers (Apex).</li>
+                    <li><b>8.</b> <strong>Assignment rules</strong>, then <strong>auto-response rules</strong>.</li>
+                    <li><b>9.</b> Workflow rules (legacy), then <strong>escalation rules</strong>.</li>
+                    <li><b>10.</b> <strong>After-save</strong> record-triggered flows (and legacy processes).</li>
+                    <li><b>11.</b> <strong>Entitlement rules</strong>.</li>
+                    <li><b>12.</b> Roll-up summary and cross-object formula updates on parent records, then sharing
+                        evaluation.</li>
+                    <li><b>13.</b> Commit, then post-commit work (emails, async jobs).</li>
+                </ul>
+
+                <div class="callout warn">
+                    <span class="c-ico">⚠️</span>
+                    <div class="c-body"><span class="c-title">What isn't guaranteed</span>
+                        The order of multiple triggers on one object, or multiple flows of the same type, isn't
+                        guaranteed unless you set a trigger order.
+                        Developer detail is on <a href="apex-triggers.html">Triggers &amp; Order of Execution</a>.</div>
+                </div>
+
+                <!-- ============================================ -->
+                <h2 id="interview">Interview questions</h2>
+
+                <details class="acc">
+                    <summary><span class="q-num">1</span> What is the difference between a profile and a permission
+                        set?<span class="q-diff med">Medium</span></summary>
+                    <div class="acc-body">
+                        <p>Every user has exactly one <strong>profile</strong>, which sets the baseline: object and
+                            field access, app and tab visibility,
+                            record type and layout assignment, login hours and IP ranges. <strong>Permission
+                                sets</strong> only add access on top, and a user can have many.
+                            Salesforce recommends keeping profiles minimal and granting access through permission sets
+                            and permission set groups.</p>
+                    </div>
+                </details>
+
+                <details class="acc">
+                    <summary><span class="q-num">2</span> A user can't see a value in a dependent picklist. What do you
+                        check?<span class="q-diff med">Medium</span></summary>
+                    <div class="acc-body">
+                        <p>First the <strong>field dependency matrix</strong> (is the value included for the chosen
+                            controlling value?), then the
+                            <strong>record type</strong> (is the value enabled there?), then field-level security on
+                            both fields and whether the controlling field is on the layout.
+                        </p>
+                    </div>
+                </details>
+
+                <details class="acc">
+                    <summary><span class="q-num">3</span> What's the difference between a quick action and a global
+                        action?<span class="q-diff med">Medium</span></summary>
+                    <div class="acc-body">
+                        <p>An object-specific action belongs to one object and inherits context, so records it creates
+                            are automatically related.
+                            A global action isn't tied to an object and creates standalone records. Global actions go in
+                            the global publisher layout; object actions go in the page layout.</p>
+                    </div>
+                </details>
+
+                <details class="acc">
+                    <summary><span class="q-num">4</span> A validation rule blocks a record that an assignment rule
+                        should have routed. Which runs first?<span class="q-diff hard">Hard</span></summary>
+                    <div class="acc-body">
+                        <p>The <strong>validation rule</strong>. Custom validation runs before the save, and assignment
+                            rules run after it.
+                            If validation fails, the save stops and assignment never happens.</p>
+                    </div>
+                </details>
+
+                <details class="acc">
+                    <summary><span class="q-num">5</span> Why might a Flow fail only on a bulk data load?<span
+                            class="q-diff hard">Hard</span></summary>
+                    <div class="acc-body">
+                        <p>Governor limits are per transaction, and a data load processes up to 200 records at once. A
+                            <strong>Get Records or DML element inside a loop</strong>
+                            works for one record but exceeds the 100 SOQL or 150 DML limit for a batch. Move the query
+                            or update outside the loop and work on collections.</p>
+                    </div>
+                </details>
+
+                <!-- ============================================ -->
+                <h2 id="check">Quick check</h2>
+
+                <div class="quiz">
+                    <div class="q-text">1. You need to set the State picklist based on the Country picklist. What do you
+                        create?</div>
+                    <button class="opt">A validation rule only</button>
+                    <button class="opt" data-correct="1">A field dependency, with Country as the controlling
+                        field</button>
+                    <button class="opt">A formula field</button>
+                    <div class="explain">A controlling picklist filters the values in a dependent picklist. Add a
+                        validation rule too if API loads must be enforced.</div>
+                </div>
+
+                <div class="quiz">
+                    <div class="q-text">2. Which runs first when a record is saved?</div>
+                    <button class="opt">Assignment rules</button>
+                    <button class="opt">After-save flows</button>
+                    <button class="opt" data-correct="1">Before-save flows</button>
+                    <div class="explain">Before-save flows run first, then before triggers, validation, duplicate rules,
+                        the save itself, and only then assignment rules and after-save flows.</div>
+                </div>
+
+                <div class="quiz">
+                    <div class="q-text">3. Which lead setting controls which Lead Status values a record type can use?
+                    </div>
+                    <button class="opt" data-correct="1">The lead process</button>
+                    <button class="opt">The assignment rule</button>
+                    <button class="opt">The lead field mapping</button>
+                    <div class="explain">A lead process lists the Lead Status values available per record type. Field
+                        mapping only controls what carries over at conversion.</div>
+                </div>
+
+                <div class="page-nav" id="pageNav"></div>
+            </article>
+            <footer class="site-footer">Salesforce Mastery Notes · Admin Extras</footer>
+        </main>
+        <nav class="toc" id="toc"></nav>
+    </div>
+
+    <div class="scrim" id="scrim"></div>
+    <button id="toTop" aria-label="Back to top">↑</button>
+    <script src="../assets/js/nav.js"></script>
+    <script src="../assets/js/app.js"></script>
+</body>
+
+</html>
